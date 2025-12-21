@@ -1,0 +1,53 @@
+---
+# Headless service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bitcoind.fullname" . }}-headless
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "bitcoind.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "bitcoind.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: p2p
+      port: {{ .Values.service.p2pPort }}
+      targetPort: p2p
+      protocol: TCP
+    - name: rpc
+      port: {{ .Values.service.rpcPort }}
+      targetPort: rpc
+      protocol: TCP
+---
+# ClusterIP service for RPC access
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bitcoind.fullname" . }}-rpc
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "bitcoind.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9332"
+    prometheus.io/path: "/metrics"
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "bitcoind.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: rpc
+      port: {{ .Values.service.rpcPort }}
+      targetPort: rpc
+      protocol: TCP
+    - name: zmq-block
+      port: {{ .Values.service.zmqBlockPort }}
+      targetPort: zmq-block
+      protocol: TCP
+    - name: zmq-tx
+      port: {{ .Values.service.zmqTxPort }}
+      targetPort: zmq-tx
+      protocol: TCP

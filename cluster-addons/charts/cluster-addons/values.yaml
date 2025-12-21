@@ -1,0 +1,56 @@
+# Cluster Addons Values
+
+namespace:
+  name: bitcoin-prod
+  labels:
+    app.kubernetes.io/name: bitcoin
+    app.kubernetes.io/component: infrastructure
+
+serviceAccount:
+  create: true
+  name: bitcoind
+  annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/bitcoind
+
+storageClass:
+  create: true
+  name: gp3
+  provisioner: ebs.csi.aws.com
+  volumeBindingMode: WaitForFirstConsumer
+  reclaimPolicy: Retain
+  parameters:
+    type: gp3
+    iops: "3000"
+    throughput: "125"
+    encrypted: "true"
+
+networkPolicy:
+  enabled: true
+  # Default deny all ingress/egress, allow only required
+  allowP2P: true
+  allowRPC: true
+  allowDNS: true
+
+resourceQuota:
+  enabled: true
+  requests:
+    cpu: "8"
+    memory: "16Gi"
+  limits:
+    cpu: "16"
+    memory: "32Gi"
+  pods: "10"
+  persistentVolumeClaims: "5"
+  storage: "2Ti"
+
+limitRange:
+  enabled: true
+  default:
+    cpu: "1"
+    memory: "2Gi"
+  defaultRequest:
+    cpu: "500m"
+    memory: "1Gi"
+  max:
+    cpu: "4"
+    memory: "8Gi"

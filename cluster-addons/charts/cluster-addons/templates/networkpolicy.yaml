@@ -1,0 +1,90 @@
+{{- if .Values.networkPolicy.enabled }}
+---
+# Default deny all ingress/egress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "cluster-addons.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow DNS
+{{- if .Values.networkPolicy.allowDNS }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "cluster-addons.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}
+---
+# Allow P2P traffic (port 8333)
+{{- if .Values.networkPolicy.allowP2P }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-p2p
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "cluster-addons.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bitcoind
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8333
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 8333
+{{- end }}
+---
+# Allow RPC within namespace (port 8332)
+{{- if .Values.networkPolicy.allowRPC }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-rpc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "cluster-addons.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bitcoind
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespace.name }}
+      ports:
+        - protocol: TCP
+          port: 8332
+{{- end }}
+{{- end }}

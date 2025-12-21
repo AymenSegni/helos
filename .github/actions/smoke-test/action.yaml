@@ -1,0 +1,65 @@
+name: 'Smoke Test and Health Check'
+description: 'Run smoke test and health check on deployed infrastructure'
+
+inputs:
+  aws_role_arn:
+    description: 'AWS OIDC role ARN'
+    required: true
+  aws_region:
+    description: 'AWS region'
+    required: false
+    default: 'eu-west-1'
+  cluster_name:
+    description: 'EKS cluster name'
+    required: true
+  namespace:
+    description: 'Kubernetes namespace'
+    required: true
+  run_health_check:
+    description: 'Run health check (true/false)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.aws_role_arn }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Update kubeconfig
+      shell: bash
+      run: |
+        aws eks update-kubeconfig --name ${{ inputs.cluster_name }} --region ${{ inputs.aws_region }}
+
+    - name: Run Smoke Test
+      shell: bash
+      env:
+        NAMESPACE: ${{ inputs.namespace }}
+        CLUSTER_NAME: ${{ inputs.cluster_name }}
+        AWS_REGION: ${{ inputs.aws_region }}
+      run: |
+        chmod +x scripts/smoke-test.sh
+        ./scripts/smoke-test.sh
+
+    - name: Wait for pod to be ready
+      if: inputs.run_health_check == 'true'
+      shell: bash
+      run: |
+        echo "Waiting for bitcoind pod to be ready..."
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=bitcoind \
+          -n ${{ inputs.namespace }} --timeout=300s || true
+
+    - name: Run Health Check
+      if: inputs.run_health_check == 'true'
+      shell: bash
+      env:
+        NAMESPACE: ${{ inputs.namespace }}
+      run: |
+        chmod +x scripts/health-check.sh
+        ./scripts/health-check.sh

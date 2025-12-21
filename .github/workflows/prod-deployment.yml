@@ -1,0 +1,139 @@
+name: Deploy Prod Environment
+
+on:
+  # Manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      skip_infra:
+        description: 'Skip infra deployment'
+        required: false
+        type: boolean
+        default: false
+      confirm:
+        description: 'Type "deploy-prod" to confirm'
+        required: true
+        type: string
+  # Trigger on release publish
+  release:
+    types: [published]
+
+env:
+  ENVIRONMENT: prod
+  AWS_REGION: eu-west-1
+  CLUSTER_NAME: helos-prod
+  NAMESPACE: bitcoin-prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # ============================================================
+  # Validation (manual trigger only)
+  # ============================================================
+  validate:
+    name: Validate Confirmation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'deploy-prod'
+        run: |
+          echo "❌ You must type 'deploy-prod' to confirm production deployment."
+          exit 1
+
+  # ============================================================
+  # Infrastructure Layer
+  # ============================================================
+  infra:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: always() && github.event.inputs.skip_infra != 'true' && (needs.validate.result == 'success' || needs.validate.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Infra
+        uses: ./.github/actions/terraform-deploy
+        with:
+          layer: infra
+          environment: ${{ env.ENVIRONMENT }}
+          aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN_PROD }}
+          aws_region: ${{ env.AWS_REGION }}
+
+  # ============================================================
+  # Docker Build
+  # ============================================================
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [infra]
+    if: always() && (needs.infra.result == 'success' || needs.infra.result == 'skipped')
+    outputs:
+      image_tag: ${{ steps.build.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Push
+        id: build
+        uses: ./.github/actions/docker-build
+        with:
+          aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN_PROD }}
+          aws_region: ${{ env.AWS_REGION }}
+
+  # ============================================================
+  # Cluster Addons Layer
+  # ============================================================
+  cluster-addons:
+    name: Deploy Cluster Addons
+    runs-on: ubuntu-latest
+    needs: [infra]
+    if: always() && (needs.infra.result == 'success' || needs.infra.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Addons
+        uses: ./.github/actions/terraform-deploy
+        with:
+          layer: cluster-addons
+          environment: ${{ env.ENVIRONMENT }}
+          aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN_PROD }}
+          aws_region: ${{ env.AWS_REGION }}
+
+  # ============================================================
+  # Bitcoin Core Layer
+  # ============================================================
+  btcd-core:
+    name: Deploy Bitcoin Core
+    runs-on: ubuntu-latest
+    needs: [cluster-addons, docker-build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Bitcoin Core
+        uses: ./.github/actions/terraform-deploy
+        with:
+          layer: btcd-core
+          environment: ${{ env.ENVIRONMENT }}
+          aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN_PROD }}
+          aws_region: ${{ env.AWS_REGION }}
+          extra_vars: '-var=image_tag=${{ needs.docker-build.outputs.image_tag }}'
+
+  # ============================================================
+  # Verification
+  # ============================================================
+  verify:
+    name: Verify Deployment
+    runs-on: ubuntu-latest
+    needs: [btcd-core]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Smoke Test & Health Check
+        uses: ./.github/actions/smoke-test
+        with:
+          aws_role_arn: ${{ secrets.AWS_OIDC_ROLE_ARN_PROD }}
+          aws_region: ${{ env.AWS_REGION }}
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          namespace: ${{ env.NAMESPACE }}
+          run_health_check: 'true'
