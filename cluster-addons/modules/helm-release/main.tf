@@ -21,7 +21,7 @@ terraform {
 
 module "helm_release" {
   source  = "cloudposse/helm-release/aws"
-  version = "~> 0.10.1"
+  version = "~> 0.10"
 
   name      = var.name
   chart     = var.chart_path
@@ -36,10 +36,10 @@ module "helm_release" {
   values = var.values
 
   # IRSA configuration
+  # Note: cloudposse module requires non-null string, use empty string fallback
   iam_role_enabled            = var.iam_role_enabled
-  eks_cluster_oidc_issuer_url = var.eks_cluster_oidc_issuer_url
+  eks_cluster_oidc_issuer_url = coalesce(var.eks_cluster_oidc_issuer_url, "")
   service_account_name        = var.service_account_name
-
   # Helm options
   atomic          = var.atomic
   wait            = var.wait

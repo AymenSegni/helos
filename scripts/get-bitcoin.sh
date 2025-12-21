@@ -106,18 +106,22 @@ for key in "${SIGNING_KEYS[@]}"; do
 done
 
 # Verify GPG signature
+# Note: gpg --verify returns non-zero if ANY signature can't be verified,
+# even if some are good. We capture output and check for at least one good signature.
 log_info "Verifying GPG signature..."
-if gpg --verify SHA256SUMS.asc SHA256SUMS 2>&1 | grep -q "Good signature"; then
-    log_success "GPG signature verified"
+GPG_OUTPUT=$(gpg --verify SHA256SUMS.asc SHA256SUMS 2>&1 || true)
+
+# Count good signatures
+GOOD_SIGS=$(echo "${GPG_OUTPUT}" | grep -c "Good signature" || true)
+
+if [[ "${GOOD_SIGS}" -ge 1 ]]; then
+    log_success "GPG signature verified (${GOOD_SIGS} valid signature(s) found)"
+    echo "${GPG_OUTPUT}" | grep "Good signature" | head -3
 else
-    # Check if at least one valid signature exists
-    if gpg --verify SHA256SUMS.asc SHA256SUMS 2>&1 | grep -q "Good signature"; then
-        log_success "GPG signature verified (at least one valid signature)"
-    else
-        log_error "GPG signature verification FAILED!"
-        gpg --verify SHA256SUMS.asc SHA256SUMS 2>&1 || true
-        exit 1
-    fi
+    log_error "GPG signature verification FAILED!"
+    log_error "No valid signatures found"
+    echo "${GPG_OUTPUT}"
+    exit 1
 fi
 
 # Verify SHA256 checksum
