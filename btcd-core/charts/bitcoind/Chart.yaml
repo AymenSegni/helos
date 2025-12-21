@@ -1,0 +1,13 @@
+apiVersion: v2
+name: bitcoind
+description: Bitcoin Core 29.0 node deployment
+type: application
+version: 1.0.0
+appVersion: "29.0"
+keywords:
+  - bitcoin
+  - blockchain
+  - btc
+  - cryptocurrency
+maintainers:
+  - name: Helos Team

@@ -1,0 +1,93 @@
+# Bitcoin Core 29.0 Values
+
+image:
+  repository: bitcoind
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+namespace: bitcoin-prod
+
+serviceAccount:
+  name: bitcoind
+
+# Bitcoin configuration
+bitcoin:
+  network: mainnet  # mainnet, testnet, signet, regtest
+  rpcUser: bitcoin
+  # rpcPassword is set via secret
+  txindex: false
+  prune: 0  # 0 = full node, >550 = prune to N MB
+  dbCacheMB: 4096
+  maxConnections: 125
+  maxUploadTargetMB: 5000
+  extraArgs: []
+
+# StatefulSet configuration
+replicas: 1
+
+# Resources
+resources:
+  requests:
+    cpu: "1"
+    memory: 4Gi
+  limits:
+    cpu: "4"
+    memory: 8Gi
+
+# Persistence
+persistence:
+  enabled: true
+  storageClass: gp3
+  size: 600Gi
+  accessModes:
+    - ReadWriteOnce
+
+# Security context
+securityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  runAsNonRoot: true
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  capabilities:
+    drop:
+      - ALL
+
+# Probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  periodSeconds: 60
+  timeoutSeconds: 30
+  failureThreshold: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 30
+  failureThreshold: 60
+
+# Graceful shutdown
+terminationGracePeriodSeconds: 600
+
+# Service configuration
+service:
+  type: ClusterIP
+  rpcPort: 8332
+  p2pPort: 8333
+  zmqBlockPort: 28332
+  zmqTxPort: 28333

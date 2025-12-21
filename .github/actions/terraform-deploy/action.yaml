@@ -1,0 +1,64 @@
+name: 'Terraform Deploy'
+description: 'Deploy a Terraform layer with environment-specific tfvars'
+
+inputs:
+  layer:
+    description: 'Layer to deploy (infra, cluster-addons, btcd-core)'
+    required: true
+  environment:
+    description: 'Environment (dev, prod)'
+    required: true
+  aws_role_arn:
+    description: 'AWS OIDC role ARN'
+    required: true
+  aws_region:
+    description: 'AWS region'
+    required: false
+    default: 'eu-west-1'
+  terraform_version:
+    description: 'Terraform version'
+    required: false
+    default: '1.9.0'
+  extra_vars:
+    description: 'Additional terraform variables (e.g., -var=image_tag=abc123)'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.aws_role_arn }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        terraform_wrapper: false
+
+    - name: Terraform Init
+      shell: bash
+      working-directory: ${{ inputs.layer }}/deploy
+      run: |
+        terraform init \
+          -backend-config="bucket=helos-${{ inputs.environment }}-tfstate" \
+          -backend-config="key=${{ inputs.layer }}/terraform.tfstate" \
+          -backend-config="region=${{ inputs.aws_region }}" \
+          -backend-config="dynamodb_table=helos-${{ inputs.environment }}-tflock"
+
+    - name: Terraform Plan
+      shell: bash
+      working-directory: ${{ inputs.layer }}/deploy
+      run: |
+        terraform plan \
+          -var-file="${{ inputs.environment }}.tfvars" \
+          ${{ inputs.extra_vars }} \
+          -out=tfplan
+
+    - name: Terraform Apply
+      shell: bash
+      working-directory: ${{ inputs.layer }}/deploy
+      run: terraform apply -auto-approve tfplan

@@ -1,0 +1,98 @@
+name: PR Validation & Security
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'bootstraping/**'
+      - 'infra/**'
+      - 'cluster-addons/**'
+      - 'btcd-core/**'
+
+env:
+  TF_VERSION: "1.9.0"
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  # ============================================================
+  # Terraform Format & Validate (no AWS credentials needed)
+  # ============================================================
+  validate:
+    name: Format & Validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        layer:
+          - bootstraping/deploy
+          - infra/deploy
+          - cluster-addons/deploy
+          - btcd-core/deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        working-directory: ${{ matrix.layer }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init (no backend)
+        working-directory: ${{ matrix.layer }}
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: ${{ matrix.layer }}
+        run: terraform validate
+
+  # ============================================================
+  # Security Scanning with Checkov
+  # ============================================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          skip_check: CKV_AWS_144,CKV_AWS_145  # S3 replication, KMS
+          soft_fail: true
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov-results.sarif
+          category: checkov
+
+  # ============================================================
+  # Helm Chart Linting
+  # ============================================================
+  helm-lint:
+    name: Lint Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.13.0'
+
+      - name: Lint cluster-addons chart
+        run: helm lint cluster-addons/charts/cluster-addons
+
+      - name: Lint bitcoind chart
+        run: helm lint btcd-core/charts/bitcoind
