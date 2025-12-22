@@ -12,7 +12,7 @@ module "cluster_addons" {
   cleanup_on_fail           = true
   timeout                   = 300
   wait                      = true
-  name                      = "addons"
+  name                      = "cluster-addons"
   create_namespace          = true
   service_account_name      = var.service_account_name
   service_account_namespace = var.namespace
