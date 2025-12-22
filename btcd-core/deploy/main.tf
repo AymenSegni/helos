@@ -9,7 +9,8 @@ module "bitcoind" {
   chart_path = "${path.module}/../charts/bitcoind"
   namespace  = var.namespace
 
-  create_namespace = false # Created by cluster-addons
+  create_namespace            = false # Created by cluster-addons
+  eks_cluster_oidc_issuer_url = data.terraform_remote_state.infra.outputs.cluster_oidc_issuer_url
 
   values = [
     yamlencode({

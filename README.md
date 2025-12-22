@@ -209,4 +209,3 @@ make verify-deployment # Both
 - [Bitcoin Core](https://bitcoincore.org/)
 - [EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
 - [cloudposse/terraform-aws-helm-release](https://github.com/cloudposse/terraform-aws-helm-release)
-

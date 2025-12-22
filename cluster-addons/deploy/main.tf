@@ -5,9 +5,10 @@
 module "cluster_addons" {
   source = "../modules/helm-release"
 
-  name       = "cluster-addons"
-  chart_path = "${path.module}/../charts/cluster-addons"
-  namespace  = var.namespace
+  name                        = "cluster-addons"
+  chart_path                  = "${path.module}/../charts/cluster-addons"
+  namespace                   = var.namespace
+  eks_cluster_oidc_issuer_url = data.terraform_remote_state.infra.outputs.cluster_oidc_issuer_url
 
   create_namespace = false # Chart creates it
 

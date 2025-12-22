@@ -48,7 +48,7 @@ COPY --from=builder /bitcoin/bin/bitcoin-tx /usr/local/bin/bitcoin-tx
 COPY --from=builder /bitcoin/bin/bitcoin-util /usr/local/bin/bitcoin-util
 
 # Copy entrypoint script
-# Note: For distroless, we use a statically compiled wrapper or 
+# Note: For distroless, we use a statically compiled wrapper or
 # embed configuration directly. Since distroless has no shell,
 # we'll configure via command-line arguments.
 
