@@ -8,7 +8,7 @@ module "cluster_addons" {
   name                        = "cluster-addons"
   chart_path                  = "${path.module}/../charts/cluster-addons"
   namespace                   = var.namespace
-  eks_cluster_oidc_issuer_url = data.terraform_remote_state.infra.outputs.cluster_oidc_issuer_url
+  eks_cluster_oidc_issuer_url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
 
   create_namespace = false # Chart creates it
 
@@ -36,3 +36,4 @@ module "cluster_addons" {
 
   tags = var.default_tags
 }
+cluster_oidc_issuer_url
