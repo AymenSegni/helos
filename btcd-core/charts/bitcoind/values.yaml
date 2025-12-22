@@ -103,4 +103,3 @@ service:
   p2pPort: 8333
   zmqBlockPort: 28332
   zmqTxPort: 28333
-

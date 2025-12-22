@@ -1,15 +1,26 @@
-# Bitcoin Core Layer - Main Module
-# Deploys Bitcoin Core via Helm
-
+#------------------------------------------------------------------------------#
 # Deploy Bitcoin Core via Helm
-module "bitcoind" {
-  source = "../modules/helm-release"
+# -----------------------------------------------------------------------------#
+module "btcd_core" {
 
-  chart                = "${path.module}/../charts/bitcoind"
-  kubernetes_namespace = var.namespace
+  source  = "cloudposse/helm-release/aws"
+  version = "v0.10.1"
 
-  create_namespace            = false # Created by cluster-addons
+  # helm release settings
+  atomic                    = true
+  cleanup_on_fail           = true
+  timeout                   = 300
+  wait                      = true
+  name                      = "btcd-core"
+  create_namespace          = var.namespace
+  service_account_name      = var.service_account_name
+  service_account_namespace = var.namespace
+  kubernetes_namespace      = var.namespace
+
   eks_cluster_oidc_issuer_url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
+
+  chart         = "${path.module}/../charts/bitcoind"
+  chart_version = "1.0.0"
 
   values = [
     yamlencode({
@@ -39,5 +50,5 @@ module "bitcoind" {
   ]
 
   tags = var.default_tags
-}
 
+}
