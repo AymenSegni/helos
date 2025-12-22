@@ -49,7 +49,7 @@ class TestCountIps(unittest.TestCase):
 """
         stream = io.StringIO(log_data)
         result = count_ips(stream)
-        
+
         self.assertEqual(result["192.168.1.1"], 3)
         self.assertEqual(result["192.168.1.2"], 1)
 
@@ -58,12 +58,12 @@ class TestCountIps(unittest.TestCase):
         log_data = """[ts] 192.168.1.1 /a GET ua
 
 [ts] 192.168.1.1 /b GET ua
-   
+
 [ts] 192.168.1.1 /c GET ua
 """
         stream = io.StringIO(log_data)
         result = count_ips(stream)
-        
+
         self.assertEqual(result["192.168.1.1"], 3)
 
     def test_skips_malformed_lines(self):
@@ -76,7 +76,7 @@ single
 """
         stream = io.StringIO(log_data)
         result = count_ips(stream)
-        
+
         self.assertEqual(result["192.168.1.1"], 3)
         self.assertEqual(len(result), 1)
 
@@ -84,7 +84,7 @@ single
         """Should handle empty input."""
         stream = io.StringIO("")
         result = count_ips(stream)
-        
+
         self.assertEqual(len(result), 0)
 
 
@@ -95,7 +95,7 @@ class TestFormatOutput(unittest.TestCase):
         """Should format output sorted by count descending."""
         counts = Counter({"192.168.1.1": 10, "10.0.0.1": 5, "172.16.0.1": 20})
         result = format_output(counts)
-        
+
         lines = result.split("\n")
         self.assertEqual(lines[0], "20 172.16.0.1")
         self.assertEqual(lines[1], "10 192.168.1.1")

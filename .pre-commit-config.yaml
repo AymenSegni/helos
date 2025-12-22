@@ -1,0 +1,43 @@
+repos:
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.99.5
+  hooks:
+  - id: terraform_fmt
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+  hooks:
+  # Git style
+  - id: check-added-large-files
+  - id: check-merge-conflict
+  - id: check-vcs-permalinks
+  - id: forbid-new-submodules
+
+  # Common errors
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+    args: [--markdown-linebreak-ext=md]
+    exclude: CHANGELOG.md
+  - id: check-merge-conflict
+  - id: check-executables-have-shebangs
+
+  # Security
+  - id: detect-aws-credentials
+    args:
+    - --allow-missing-credentials
+  - id: detect-private-key
+
+  # Detect hardcoded secrets
+- repo: https://github.com/gitleaks/gitleaks
+  rev: a248f9279b38aeff5bbd4c85cc6f15b64d27e794  # frozen: v8.27.0
+  hooks:
+  - id: gitleaks
+
+  # Run ruff on everything
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.14.6
+  hooks:
+    - id: ruff-check
+      args: [ --fix ]
+    - id: ruff-format
+    

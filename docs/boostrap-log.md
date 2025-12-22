@@ -10,7 +10,7 @@
 [INFO] GitHub Org:  AymenSegni
 [INFO] GitHub Repo: helos
 [INFO] Environment: dev
-[INFO] 
+[INFO]
 [INFO] Checking AWS credentials...
 [SUCCESS] AWS Account: ***************
 [SUCCESS] AWS Region: eu-west-1
@@ -246,7 +246,7 @@ To perform exactly these actions, run the following command to apply:
     terraform apply "tfplan"
 
 [WARN] Review the plan above.
-Apply these changes? (yes/no): 
+Apply these changes? (yes/no):
 ```
 
 ## Apply
@@ -276,11 +276,11 @@ Outputs:
 gha_role_arn = "arn:aws:iam::***************:role/**************"
 tfstate_bucket_name = "helos-dev-tfstate"
 tfstate_dynamodb_table = "helos-dev-tflock"
-[INFO] 
+[INFO]
 [SUCCESS] ============================================
 [SUCCESS]  Bootstraping Complete! (DEV)
 [SUCCESS] ============================================
-[INFO] 
+[INFO]
 [INFO] Add this as a GitHub repository SECRET:
 
   AWS_OIDC_ROLE_ARN_DEV = arn:aws:iam::***************:role/**************

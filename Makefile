@@ -6,7 +6,7 @@
 # Variables
 IMAGE_NAME ?= bitcoind
 IMAGE_TAG ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "latest")
-REGISTRY ?= 
+REGISTRY ?=
 AWS_REGION ?= eu-west-1
 
 # Colors for output

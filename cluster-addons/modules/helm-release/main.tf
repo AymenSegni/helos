@@ -38,7 +38,7 @@ module "helm_release" {
   # IRSA configuration
   # Note: cloudposse module requires non-null string, use empty string fallback
   iam_role_enabled            = var.iam_role_enabled
-  eks_cluster_oidc_issuer_url = coalesce(var.eks_cluster_oidc_issuer_url, "")
+  eks_cluster_oidc_issuer_url = var.eks_cluster_oidc_issuer_url
   service_account_name        = var.service_account_name
   # Helm options
   atomic          = var.atomic

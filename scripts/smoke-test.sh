@@ -30,7 +30,7 @@ FAILURES=0
 check() {
     local name="$1"
     local command="$2"
-    
+
     log_info "Checking: ${name}..."
     if eval "${command}" > /dev/null 2>&1; then
         log_success "${name}"
