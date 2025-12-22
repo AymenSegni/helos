@@ -1,16 +1,27 @@
-# Cluster Addons Layer - Main Module
-# Deploys Kubernetes platform components via Helm
+#------------------------------------------------------------------------------#
+# Deploy cluster addons via
+# -----------------------------------------------------------------------------#
 
-# Deploy cluster addons via Helm
 module "cluster_addons" {
-  source = "../modules/helm-release"
 
-  chart                       = "${path.module}/../charts/cluster-addons"
-  kubernetes_namespace        = var.namespace
+  source  = "cloudposse/helm-release/aws"
+  version = "v0.10.1"
+
+  # helm release settings
+  atomic                    = true
+  cleanup_on_fail           = true
+  timeout                   = 300
+  wait                      = true
+  name                      = "addons"
+  create_namespace          = var.namespace
+  service_account_name      = var.service_account_name
+  service_account_namespace = var.namespace
+  kubernetes_namespace      = var.namespace
+
   eks_cluster_oidc_issuer_url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
 
-  create_namespace = true # Chart creates it
-
+  chart         = "${path.module}/../charts/cluster-addons"
+  chart_version = "1.0.0"
   values = [
     yamlencode({
       namespace = {
@@ -34,5 +45,5 @@ module "cluster_addons" {
   ]
 
   tags = var.default_tags
-}
 
+}
