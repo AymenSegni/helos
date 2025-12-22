@@ -32,10 +32,13 @@ RUN /bitcoin/bin/bitcoind --version
 # ============================================================
 FROM gcr.io/distroless/base-debian12:nonroot
 
+# Re-declare ARG after FROM to use in labels
+ARG VERSION=29.0
+
 # Labels for OCI compliance
 LABEL org.opencontainers.image.title="Bitcoin Core"
 LABEL org.opencontainers.image.description="Production-grade Bitcoin Core node"
-LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.version=${VERSION}
 LABEL org.opencontainers.image.vendor="Bitcoin Core"
 LABEL org.opencontainers.image.source="https://github.com/bitcoin/bitcoin"
 LABEL org.opencontainers.image.licenses="MIT"
@@ -47,14 +50,9 @@ COPY --from=builder /bitcoin/bin/bitcoin-cli /usr/local/bin/bitcoin-cli
 COPY --from=builder /bitcoin/bin/bitcoin-tx /usr/local/bin/bitcoin-tx
 COPY --from=builder /bitcoin/bin/bitcoin-util /usr/local/bin/bitcoin-util
 
-# Copy entrypoint script
-# Note: For distroless, we use a statically compiled wrapper or
-# embed configuration directly. Since distroless has no shell,
-# we'll configure via command-line arguments.
-
-# Create data directory
-# Note: In distroless, directories must be created in the Kubernetes manifest
-# or via an init container. The nonroot user (65532) will be used.
+# Note: Distroless has no shell, so we configure via command-line arguments.
+# Data directories must be created via Kubernetes init container.
+# The distroless nonroot image runs as UID 65532.
 
 # Expose ports
 # P2P: 8333 (mainnet), 18333 (testnet), 38333 (signet), 18444 (regtest)
@@ -62,12 +60,7 @@ COPY --from=builder /bitcoin/bin/bitcoin-util /usr/local/bin/bitcoin-util
 # ZMQ: 28332, 28333
 EXPOSE 8332 8333 18332 18333 38332 38333 18443 18444 28332 28333
 
-# The distroless nonroot image runs as UID 65532
-# This is set by the base image, but we document it here
-# USER 65532:65532
-
-# Health check using bitcoin-cli
-# Note: HEALTHCHECK is not supported in distroless, use Kubernetes probes instead
+# HEALTHCHECK is not supported in distroless; use Kubernetes probes instead
 
 # Default entrypoint
 ENTRYPOINT ["/usr/local/bin/bitcoind"]

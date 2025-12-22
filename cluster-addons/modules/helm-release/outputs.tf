@@ -1,14 +1,14 @@
 output "release_name" {
   description = "Helm release name"
-  value       = var.enabled ? module.helm_release.release_name : null
+  value       = try(module.helm_release.metadata[0].name, null)
 }
 
 output "release_namespace" {
   description = "Helm release namespace"
-  value       = var.enabled ? module.helm_release.release_namespace : null
+  value       = try(module.helm_release.metadata[0].namespace, null)
 }
 
 output "metadata" {
   description = "Release metadata"
-  value       = var.enabled ? module.helm_release.metadata : null
+  value       = module.helm_release.metadata
 }

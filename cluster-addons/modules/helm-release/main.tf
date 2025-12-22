@@ -1,61 +1,27 @@
 # Helm Release Module - Wrapper for cloudposse/terraform-aws-helm-release
 
-terraform {
-  required_version = ">= 1.9.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = ">= 2.12"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.25"
-    }
-  }
-}
-
 module "helm_release" {
   source  = "cloudposse/helm-release/aws"
-  version = "~> 0.10"
-
-  name      = var.name
-  chart     = var.chart_path
-  namespace = var.namespace
-
-  create_namespace                 = var.create_namespace
-  create_namespace_with_kubernetes = var.create_namespace_with_kubernetes
+  version = "0.9.1"
 
   repository    = var.repository
+  chart         = var.chart
   chart_version = var.chart_version
+
+  create_namespace_with_kubernetes = var.create_namespace
+  kubernetes_namespace             = var.kubernetes_namespace
+  service_account_namespace        = var.kubernetes_namespace
+  service_account_name             = var.service_account_name
+  iam_role_enabled                 = var.iam_role_enabled
+
+  eks_cluster_oidc_issuer_url = var.eks_cluster_oidc_issuer_url
+
+  atomic          = var.atomic
+  cleanup_on_fail = var.cleanup_on_fail
+  timeout         = var.timeout
+  wait            = var.wait
 
   values = var.values
 
-  # IRSA configuration
-  # Note: cloudposse module requires non-null string, use empty string fallback
-  iam_role_enabled            = var.iam_role_enabled
-  eks_cluster_oidc_issuer_url = var.eks_cluster_oidc_issuer_url
-  service_account_name        = var.service_account_name
-  # Helm options
-  atomic          = var.atomic
-  wait            = var.wait
-  timeout         = var.timeout
-  cleanup_on_fail = var.cleanup_on_fail
-
   context = module.this.context
-}
-
-module "this" {
-  source  = "cloudposse/label/null"
-  version = "~> 0.25"
-
-  enabled   = var.enabled
-  namespace = var.label_namespace
-  name      = var.name
-
-  tags = var.tags
 }

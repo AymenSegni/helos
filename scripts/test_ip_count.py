@@ -7,7 +7,30 @@ import io
 import unittest
 from collections import Counter
 
-from ip_count import count_ips, format_output, parse_ip_from_line
+from ip_count import count_ips, format_output, is_valid_ip, parse_ip_from_line
+
+
+class TestIsValidIp(unittest.TestCase):
+    """Tests for is_valid_ip function."""
+
+    def test_valid_ips(self):
+        """Should return True for valid IPv4 addresses."""
+        self.assertTrue(is_valid_ip("192.168.1.1"))
+        self.assertTrue(is_valid_ip("0.0.0.0"))
+        self.assertTrue(is_valid_ip("255.255.255.255"))
+        self.assertTrue(is_valid_ip("10.0.0.1"))
+
+    def test_invalid_octet_range(self):
+        """Should return False for IPs with octets > 255."""
+        self.assertFalse(is_valid_ip("256.1.1.1"))
+        self.assertFalse(is_valid_ip("192.168.1.999"))
+        self.assertFalse(is_valid_ip("999.999.999.999"))
+
+    def test_invalid_format(self):
+        """Should return False for invalid formats."""
+        self.assertFalse(is_valid_ip("192.168.1"))
+        self.assertFalse(is_valid_ip("not-an-ip"))
+        self.assertFalse(is_valid_ip(""))
 
 
 class TestParseIpFromLine(unittest.TestCase):
@@ -31,10 +54,13 @@ class TestParseIpFromLine(unittest.TestCase):
 
     def test_invalid_ip_format(self):
         """Should return None for invalid IP formats."""
-        # Note: regex doesn't validate octet ranges, only structure
         self.assertIsNone(parse_ip_from_line("[ts] abc.def.ghi.jkl /path"))
         self.assertIsNone(parse_ip_from_line("[ts] 192.168.1 /path"))
         self.assertIsNone(parse_ip_from_line("[ts] not-an-ip /path"))
+
+    def test_invalid_octet_range(self):
+        """Should return None for IPs with octets > 255."""
+        self.assertIsNone(parse_ip_from_line("[ts] 999.999.999.999 /path"))
 
 
 class TestCountIps(unittest.TestCase):

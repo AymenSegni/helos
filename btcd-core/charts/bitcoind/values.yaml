@@ -1,7 +1,9 @@
 # Bitcoin Core 29.0 Values
 
 image:
-  repository: bitcoind
+  # Repository should be set via environment-specific tfvars
+  # e.g., 123456789.dkr.ecr.eu-west-1.amazonaws.com/bitcoind
+  repository: ""
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -42,13 +44,16 @@ persistence:
   accessModes:
     - ReadWriteOnce
 
-# Security context
+# Pod security context
 securityContext:
   runAsUser: 65532
   runAsGroup: 65532
   fsGroup: 65532
   runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
+# Container security context
 containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -58,6 +63,8 @@ containerSecurityContext:
   capabilities:
     drop:
       - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 # Probes
 livenessProbe:
@@ -84,6 +91,11 @@ startupProbe:
 # Graceful shutdown
 terminationGracePeriodSeconds: 600
 
+# PodDisruptionBudget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
 # Service configuration
 service:
   type: ClusterIP
@@ -91,3 +103,4 @@ service:
   p2pPort: 8333
   zmqBlockPort: 28332
   zmqTxPort: 28333
+
