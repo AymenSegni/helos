@@ -12,7 +12,7 @@ module "btcd_core" {
   timeout                   = 300
   wait                      = true
   name                      = "btcd-core"
-  create_namespace          = var.namespace
+  create_namespace          = false
   service_account_name      = var.service_account_name
   service_account_namespace = var.namespace
   kubernetes_namespace      = var.namespace

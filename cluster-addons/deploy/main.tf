@@ -13,7 +13,7 @@ module "cluster_addons" {
   timeout                   = 300
   wait                      = true
   name                      = "addons"
-  create_namespace          = var.namespace
+  create_namespace          = true
   service_account_name      = var.service_account_name
   service_account_namespace = var.namespace
   kubernetes_namespace      = var.namespace
