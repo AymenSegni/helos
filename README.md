@@ -55,10 +55,18 @@ Production-grade Bitcoin Core 29.0 node on AWS EKS with multi-environment suppor
 >
 > While more complex than a minimal demo, this architecture reflects how production SRE teams actually manage infrastructure at scale.
 
+> **Directory Structure Note:** This project uses a layered architecture instead of the suggested flat structure (`/docker/`, `/orchestration/`, `/ci/`). The equivalent mappings are:
+>
+> - `/docker/` → `Dockerfile` + `scripts/get-bitcoin.sh`
+> - `/orchestration/` → layered architecture `btcd-core/` + `infra` + `cluster-addons`
+> - `/ci/` → `.github/workflows/` and `.github/actions/`
+> - `/scripts/` → `scripts/` (same)
+> - `/terraform/` → `iam-module/` (IAM module)
+
 ## Project Structure
 
 ```
-helos/
+.
 ├── Dockerfile               # Multi-stage, distroless container
 ├── bootstraping/            # Layer 1: OIDC + S3 state backend
 │   ├── deploy/              # Root module + tfvars

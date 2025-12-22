@@ -102,11 +102,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - bitcoin-cli
-                - -rpcuser=$(BITCOIN_RPC_USER)
-                - -rpcpassword=$(BITCOIN_RPC_PASSWORD)
-                - -rpcconnect=127.0.0.1
-                - getblockchaininfo
+                - /bin/sh
+                - -c
+                - bitcoin-cli -rpcuser=$BITCOIN_RPC_USER -rpcpassword=$BITCOIN_RPC_PASSWORD -rpcconnect=127.0.0.1 getblockchaininfo
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
@@ -116,11 +114,9 @@ spec:
           readinessProbe:
             exec:
               command:
-                - bitcoin-cli
-                - -rpcuser=$(BITCOIN_RPC_USER)
-                - -rpcpassword=$(BITCOIN_RPC_PASSWORD)
-                - -rpcconnect=127.0.0.1
-                - getnetworkinfo
+                - /bin/sh
+                - -c
+                - bitcoin-cli -rpcuser=$BITCOIN_RPC_USER -rpcpassword=$BITCOIN_RPC_PASSWORD -rpcconnect=127.0.0.1 getnetworkinfo
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
@@ -130,11 +126,9 @@ spec:
           startupProbe:
             exec:
               command:
-                - bitcoin-cli
-                - -rpcuser=$(BITCOIN_RPC_USER)
-                - -rpcpassword=$(BITCOIN_RPC_PASSWORD)
-                - -rpcconnect=127.0.0.1
-                - getblockchaininfo
+                - /bin/sh
+                - -c
+                - bitcoin-cli -rpcuser=$BITCOIN_RPC_USER -rpcpassword=$BITCOIN_RPC_PASSWORD -rpcconnect=127.0.0.1 getblockchaininfo
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.startupProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
@@ -149,11 +143,9 @@ spec:
             preStop:
               exec:
                 command:
-                  - bitcoin-cli
-                  - -rpcuser=$(BITCOIN_RPC_USER)
-                  - -rpcpassword=$(BITCOIN_RPC_PASSWORD)
-                  - -rpcconnect=127.0.0.1
-                  - stop
+                  - /bin/sh
+                  - -c
+                  - bitcoin-cli -rpcuser=$BITCOIN_RPC_USER -rpcpassword=$BITCOIN_RPC_PASSWORD -rpcconnect=127.0.0.1 stop
 
       volumes:
         - name: tmp

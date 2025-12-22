@@ -1,105 +1,76 @@
-variable "enabled" {
-  description = "Enable/disable the module"
-  type        = bool
-  default     = true
-}
-
-variable "name" {
-  description = "Release name"
-  type        = string
-}
-
-variable "chart_path" {
-  description = "Path to local chart"
-  type        = string
-  default     = null
-}
+# Helm Release Variables
 
 variable "repository" {
-  description = "Helm repository URL"
   type        = string
+  description = "Repository URL where to locate the requested chart"
   default     = null
+}
+
+variable "chart" {
+  type        = string
+  description = "Chart name to be installed. Can be local path, URL, or chart name if repository is specified"
 }
 
 variable "chart_version" {
-  description = "Chart version"
   type        = string
+  description = "Specify the exact chart version to install"
   default     = null
 }
 
-variable "namespace" {
-  description = "Kubernetes namespace"
-  type        = string
-}
-
 variable "create_namespace" {
-  description = "Create namespace"
   type        = bool
-  default     = false
+  description = "If true, the namespace will be created"
+  default     = true
 }
 
-variable "create_namespace_with_kubernetes" {
-  description = "Create namespace with kubernetes provider"
-  type        = bool
-  default     = false
+variable "kubernetes_namespace" {
+  type        = string
+  description = "The namespace to install the release into"
 }
 
-variable "values" {
-  description = "List of values in raw YAML"
-  type        = list(string)
-  default     = []
+variable "service_account_name" {
+  type        = string
+  description = "Kubernetes ServiceAccount name"
+  default     = null
 }
 
 variable "iam_role_enabled" {
-  description = "Enable IRSA"
   type        = bool
+  description = "Whether to create an IAM role for IRSA"
   default     = false
 }
 
 variable "eks_cluster_oidc_issuer_url" {
-  description = "EKS OIDC issuer URL"
   type        = string
-  default     = null
-}
-
-variable "service_account_name" {
-  description = "Service account name for IRSA"
-  type        = string
-  default     = null
+  description = "OIDC issuer URL for the EKS cluster"
 }
 
 variable "atomic" {
-  description = "Atomic install"
   type        = bool
+  description = "If set, installation process purges chart on fail"
   default     = true
 }
 
-variable "wait" {
-  description = "Wait for resources"
+variable "cleanup_on_fail" {
   type        = bool
+  description = "Allow deletion of new resources created in this upgrade when upgrade fails"
   default     = true
 }
 
 variable "timeout" {
-  description = "Timeout in seconds"
   type        = number
+  description = "Time in seconds to wait for any individual kubernetes operation"
   default     = 300
 }
 
-variable "cleanup_on_fail" {
-  description = "Cleanup on failure"
+variable "wait" {
   type        = bool
+  description = "Will wait until all resources are in a ready state before marking the release as successful"
   default     = true
 }
 
-variable "label_namespace" {
-  description = "Label namespace"
-  type        = string
+variable "values" {
+  type        = any
+  description = "List of values in raw yaml to pass to helm"
   default     = null
-}
-
-variable "tags" {
-  description = "Tags"
-  type        = map(string)
-  default     = {}
 }

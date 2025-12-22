@@ -5,9 +5,8 @@
 module "bitcoind" {
   source = "../modules/helm-release"
 
-  name       = "bitcoind"
-  chart_path = "${path.module}/../charts/bitcoind"
-  namespace  = var.namespace
+  chart                = "${path.module}/../charts/bitcoind"
+  kubernetes_namespace = var.namespace
 
   create_namespace            = false # Created by cluster-addons
   eks_cluster_oidc_issuer_url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
@@ -41,3 +40,4 @@ module "bitcoind" {
 
   tags = var.default_tags
 }
+

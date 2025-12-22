@@ -24,6 +24,21 @@ from typing import Optional, TextIO
 IP_PATTERN = re.compile(r"^(\d{1,3}\.){3}\d{1,3}$")
 
 
+def is_valid_ip(ip: str) -> bool:
+    """
+    Validate IPv4 address format and octet ranges.
+
+    Returns True if IP matches format and all octets are 0-255.
+    """
+    if not IP_PATTERN.match(ip):
+        return False
+    try:
+        octets = ip.split(".")
+        return all(0 <= int(octet) <= 255 for octet in octets)
+    except ValueError:
+        return False
+
+
 def parse_ip_from_line(line: str) -> Optional[str]:
     """
     Extract IP address from a log line.
@@ -42,8 +57,8 @@ def parse_ip_from_line(line: str) -> Optional[str]:
     # IP is the second field (after timestamp)
     ip = parts[1]
 
-    # Validate IP format
-    if IP_PATTERN.match(ip):
+    # Validate IP format and octet ranges
+    if is_valid_ip(ip):
         return ip
 
     return None
