@@ -4,7 +4,9 @@ provider "aws" {
   region = var.aws_region
 }
 
+#---------------------------------------------------------------------------#
 # Get cluster info from infra layer
+#---------------------------------------------------------------------------#
 data "terraform_remote_state" "infra" {
   backend = "s3"
   config = {
@@ -13,10 +15,20 @@ data "terraform_remote_state" "infra" {
     region = "eu-west-1"
   }
 }
+#------------------------------------------------------------------------------#
+# pull the EKS K8S auth using data source created in the eks deployment phase  #
+#------------------------------------------------------------------------------#
+data "aws_eks_cluster" "eks" {
+  name = data.terraform_remote_state.infra.outputs.cluster_name
+}
 
 data "aws_eks_cluster_auth" "this" {
   name = data.terraform_remote_state.infra.outputs.cluster_name
 }
+
+#----------------------------------------------------------------------------#
+# Configure the Kubernetes and Helm providers to connect to the EKS cluster  #
+#----------------------------------------------------------------------------#
 
 provider "kubernetes" {
   host                   = data.terraform_remote_state.infra.outputs.cluster_endpoint

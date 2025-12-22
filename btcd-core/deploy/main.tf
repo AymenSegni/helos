@@ -10,7 +10,7 @@ module "bitcoind" {
   namespace  = var.namespace
 
   create_namespace            = false # Created by cluster-addons
-  eks_cluster_oidc_issuer_url = data.terraform_remote_state.infra.outputs.cluster_oidc_issuer_url
+  eks_cluster_oidc_issuer_url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
 
   values = [
     yamlencode({
