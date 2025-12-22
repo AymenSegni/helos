@@ -36,4 +36,3 @@ module "cluster_addons" {
 
   tags = var.default_tags
 }
-cluster_oidc_issuer_url
