@@ -1,11 +1,5 @@
 # Cluster Addons Values
 
-namespace:
-  name: bitcoin-prod
-  labels:
-    app.kubernetes.io/name: bitcoin
-    app.kubernetes.io/component: infrastructure
-
 serviceAccount:
   create: true
   name: bitcoind
