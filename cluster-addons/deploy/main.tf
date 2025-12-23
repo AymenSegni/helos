@@ -13,7 +13,7 @@ module "cluster_addons" {
   timeout         = 300
   wait            = true
   name            = "cluster-addons"
-  # Use Terraform to create namespace (not Helm's --create-namespace)
+
   create_namespace                 = false
   create_namespace_with_kubernetes = true
   service_account_name             = var.service_account_name
@@ -25,9 +25,7 @@ module "cluster_addons" {
   chart_version = "1.0.0"
   values = [
     yamlencode({
-      namespace = {
-        name = var.namespace
-      }
+
       serviceAccount = {
         create      = true
         name        = var.service_account_name
