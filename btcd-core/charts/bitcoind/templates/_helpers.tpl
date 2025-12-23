@@ -39,10 +39,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Network flag
+Network flag - returns the appropriate network flag for non-mainnet networks
 */}}
 {{- define "bitcoind.networkFlag" -}}
-{{- if eq .Values.bitcoin.network "testnet" }}-testnet{{ end }}
-{{- if eq .Values.bitcoin.network "signet" }}-signet{{ end }}
-{{- if eq .Values.bitcoin.network "regtest" }}-regtest{{ end }}
+{{- if eq .Values.bitcoin.network "testnet" -}}
+- "-testnet"
+{{- else if eq .Values.bitcoin.network "signet" -}}
+- "-signet"
+{{- else if eq .Values.bitcoin.network "regtest" -}}
+- "-regtest"
+{{- end -}}
 {{- end }}

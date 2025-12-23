@@ -7,6 +7,10 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
+# Optional name overrides
+nameOverride: ""
+fullnameOverride: ""
+
 namespace: bitcoin-prod
 
 serviceAccount:
