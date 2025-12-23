@@ -32,6 +32,45 @@ module "eks" {
   node_max_size       = var.node_max_size
   node_desired_size   = var.node_desired_size
 
+  # Cluster access entries (AWS CAM)
+  access_entries = {
+    # Root account access
+    root = {
+      principal_arn = "arn:aws:iam::${var.aws_account_id}:root"
+      type          = "STANDARD"
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+
+    # GitHub Actions OIDC role
+    gha_oidc = {
+      principal_arn = var.gha_oidc_role_arn
+      type          = "STANDARD"
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+
+    # Aymen's CLI user (tf-0)
+    tf_user = {
+      principal_arn = var.tf_user_arn
+      type          = "STANDARD"
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+  }
+
   tags = var.default_tags
 }
 

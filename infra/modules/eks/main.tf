@@ -32,6 +32,9 @@ module "eks" {
   # Give Terraform identity admin access
   enable_cluster_creator_admin_permissions = true
 
+  # Cluster access entries (AWS CAM)
+  access_entries = var.access_entries
+
   # EKS Addons
   cluster_addons = {
     coredns = {
