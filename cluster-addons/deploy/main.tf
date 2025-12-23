@@ -8,11 +8,12 @@ module "cluster_addons" {
   version = "v0.10.1"
 
   # helm release settings
-  atomic                           = true
-  cleanup_on_fail                  = true
-  timeout                          = 300
-  wait                             = true
-  name                             = "cluster-addons"
+  atomic          = true
+  cleanup_on_fail = true
+  timeout         = 300
+  wait            = true
+  name            = "cluster-addons"
+
   create_namespace                 = false
   create_namespace_with_kubernetes = true
   service_account_name             = var.service_account_name
