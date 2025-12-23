@@ -25,7 +25,9 @@ module "cluster_addons" {
   chart_version = "1.0.0"
   values = [
     yamlencode({
-
+      namespace = {
+        name = var.namespace
+      }
       serviceAccount = {
         create      = true
         name        = var.service_account_name
