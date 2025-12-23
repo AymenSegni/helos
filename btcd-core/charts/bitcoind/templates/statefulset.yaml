@@ -68,7 +68,10 @@ spec:
             {{- if .Values.bitcoin.maxUploadTargetMB }}
             - "-maxuploadtarget={{ .Values.bitcoin.maxUploadTargetMB }}"
             {{- end }}
-            {{- include "bitcoind.networkFlag" . | nindent 12 }}
+            {{- $networkFlag := include "bitcoind.networkFlag" . | trim }}
+            {{- if $networkFlag }}
+            {{ $networkFlag }}
+            {{- end }}
             {{- range .Values.bitcoin.extraArgs }}
             - {{ . | quote }}
             {{- end }}
