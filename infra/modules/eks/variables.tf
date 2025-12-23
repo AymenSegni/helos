@@ -83,3 +83,19 @@ variable "enable_bitcoin_taint" {
   type        = bool
   default     = false
 }
+
+variable "access_entries" {
+  description = "Map of access entries to add to the cluster"
+  type = map(object({
+    principal_arn = string
+    type          = optional(string, "STANDARD")
+    policy_associations = optional(map(object({
+      policy_arn = string
+      access_scope = object({
+        namespaces = optional(list(string))
+        type       = string
+      })
+    })), {})
+  }))
+  default = {}
+}

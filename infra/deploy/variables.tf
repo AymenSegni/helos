@@ -122,3 +122,19 @@ variable "enable_bitcoin_taint" {
   type        = bool
   default     = false
 }
+
+# EKS Cluster Access - passed from GHA secrets via TF_VAR_*
+variable "aws_account_id" {
+  description = "AWS Account ID (passed from GHA secrets)"
+  type        = string
+}
+
+variable "gha_oidc_role_arn" {
+  description = "ARN of the GitHub Actions OIDC role for cluster access"
+  type        = string
+}
+
+variable "tf_user_arn" {
+  description = "ARN of Aymen's CLI user (tf-0) for local cluster access"
+  type        = string
+}
